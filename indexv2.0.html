@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>真实专业测速-无模拟假数据</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#0b1320;color:#fff;font-family:system-ui;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;}
+.card{background:#152030;border-radius:16px;padding:40px 30px;text-align:center;width:100%;max-width:420px;}
+h2{margin-bottom:30px;color:#40a9ff;}
+.info{margin:18px 0;font-size:18px;}
+.val{font-size:38px;font-weight:bold;color:#36cbcb;margin:8px 0;}
+button{margin-top:20px;padding:14px 40px;border:0;border-radius:10px;background:#40a9ff;color:#fff;font-size:17px;cursor:pointer;}
+button:disabled{background:#555;cursor:not-allowed;}
+</style>
+</head>
+<body>
+<div class="card">
+    <h2>网络真实测速</h2>
+    <div class="info">延迟 Ping<div class="val" id="ping">--</div></div>
+    <div class="info">下载 Mbps<div class="val" id="down">--</div></div>
+    <div class="info">上传 Mbps<div class="val" id="up">--</div></div>
+    <button id="btn" onclick="runSpeedTest()">开始测速</button>
+</div>
+
+<!-- 引入正规真实测速SDK，不是自己写模拟算法 -->
+<script src="https://cdn.jsdelivr.net/npm/speedtest-net@2.1.0/dist/speedtest.min.js"></script>
+<script>
+const pingEl = document.getElementById('ping');
+const downEl = document.getElementById('down');
+const upEl = document.getElementById('up');
+const btn = document.getElementById('btn');
+
+async function runSpeedTest(){
+    btn.disabled = true;
+    pingEl.innerText = "测速中";
+    downEl.innerText = "测速中";
+    upEl.innerText = "测速中";
+
+    try{
+        const st = new Speedtest();
+        st.on('ping', e=> pingEl.innerText = e.latency + ' ms');
+        st.on('download', e=> downEl.innerText = (e.download/1000).toFixed(2));
+        st.on('upload', e=> upEl.innerText = (e.upload/1000).toFixed(2));
+        await st.start();
+    }catch(err){
+        pingEl.innerText = "失败";
+        downEl.innerText = "失败";
+        upEl.innerText = "失败";
+    }
+    btn.disabled = false;
+}
+</script>
+</div>
+</body>
+</html>
+

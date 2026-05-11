@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>在线网速测试工具</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:Microsoft YaHei,sans-serif;}
+        body{background:#f5f7fa;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;}
+        .box{background:#fff;border-radius:16px;padding:40px 30px;box-shadow:0 8px 30px rgba(0,0,0,0.1);text-align:center;width:100%;max-width:450px;}
+        h1{font-size:24px;color:#333;margin-bottom:30px;}
+        .info{margin:25px 0;}
+        .item{font-size:18px;color:#555;margin:12px 0;}
+        .num{font-size:28px;color:#1677ff;font-weight:bold;margin:6px 0;}
+        button{background:#1677ff;color:#fff;border:none;padding:14px 36px;border-radius:8px;font-size:16px;cursor:pointer;transition:0.3s;}
+        button:hover{background:#0958d9;}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>在线网速测试</h1>
+        <div class="info">
+            <div class="item">下载速度</div>
+            <div class="num" id="down">-- Mbps</div>
+        </div>
+        <div class="info">
+            <div class="item">上传速度</div>
+            <div class="num" id="up">-- Mbps</div>
+        </div>
+        <div class="info">
+            <div class="item">网络延迟</div>
+            <div class="num" id="ping">-- ms</div>
+        </div>
+        <button onclick="startTest()">开始测速</button>
+    </div>
+
+    <script>
+        function startTest(){
+            let downEl = document.getElementById('down');
+            let upEl = document.getElementById('up');
+            let pingEl = document.getElementById('ping');
+            
+            downEl.innerText = "测试中...";
+            upEl.innerText = "测试中...";
+            pingEl.innerText = "测试中...";
+
+            // 模拟测速随机数值
+            setTimeout(()=>{
+                let down = (Math.random()*50 + 20).toFixed(1);
+                let up = (Math.random()*20 + 5).toFixed(1);
+                let ping = Math.floor(Math.random()*40 + 10);
+                downEl.innerText = down + " Mbps";
+                upEl.innerText = up + " Mbps";
+                pingEl.innerText = ping + " ms";
+            },2000);
+        }
+    </script>
+</body>
+</html>

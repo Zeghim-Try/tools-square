@@ -3,672 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speed Test | 网络测速</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Network Speed Test</title>
     <style>
-        /* 自定义渐变和动画 */
-        :root {
-            --gradient-start: #0f172a;
-            --gradient-mid: #1e293b;
-            --gradient-end: #334155;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.5);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%);
             min-height: 100vh;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
 
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
         }
 
-        .speed-circle {
-            position: relative;
-            width: 220px;
-            height: 220px;
+        .lang-switch {
+            text-align: right;
+            margin-bottom: 20px;
         }
 
-        .speed-circle svg {
-            transform: rotate(-90deg);
+        .lang-btn {
+            padding: 6px 12px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            background: #667eea;
+            color: white;
+            cursor: pointer;
         }
 
-        .progress-ring {
-            transition: stroke-dashoffset 0.3s ease;
+        .lang-btn.active {
+            background: #764ba2;
         }
 
-        .glow-effect {
-            box-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(59, 130, 246, 0.2);
+        h1 {
+            margin-bottom: 10px;
+            color: #333;
         }
 
-        .pulse-animation {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        .desc {
+            color: #666;
+            margin-bottom: 30px;
         }
 
+        #testBtn {
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 50px;
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 30px;
+        }
+
+        #testBtn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 测速状态提示 */
+        .status {
+            font-size: 16px;
+            color: #555;
+            margin-bottom: 20px;
+            min-height: 24px;
+        }
+
+        /* 结果展示区域 */
+        .result-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            text-align: left;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* 动画效果 */
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .slide-up {
-            animation: slideUp 0.6s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .btn-start {
-            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
-            transition: all 0.3s ease;
-        }
-
-        .btn-start:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
-        }
-
-        .btn-start:active {
-            transform: scale(0.98);
-        }
-
-        .result-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            transition: all 0.3s ease;
-        }
-
-        .result-card:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .toggle-btn {
-            transition: all 0.2s ease;
-        }
-
-        .toggle-btn.active {
-            background: rgba(59, 130, 246, 0.3);
-            border-color: #3b82f6;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            animation: blink 1s ease-in-out infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .progress-bar {
-            height: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            transition: width 0.3s ease;
-            border-radius: 2px;
+        .testing {
+            animation: pulse 1.5s infinite;
         }
     </style>
 </head>
-<body class="text-white">
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
-        <!-- 顶部控制栏 -->
-        <div class="w-full max-w-xl flex justify-between items-center mb-8 fade-in">
-            <div class="flex items-center gap-2">
-                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
-                <span class="text-xl font-bold" id="appTitle">网络测速</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <!-- 单位切换 -->
-                <div class="flex bg-white/5 rounded-lg p-1 border border-white/10">
-                    <button id="btnMbps" class="toggle-btn active px-3 py-1 rounded-md text-sm font-medium" onclick="toggleUnit('mbps')">Mbps</button>
-                    <button id="btnMBs" class="toggle-btn px-3 py-1 rounded-md text-sm font-medium" onclick="toggleUnit('mbs')">MB/s</button>
-                </div>
-                <!-- 语言切换 -->
-                <button id="langBtn" class="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10 text-sm hover:bg-white/10 transition" onclick="toggleLanguage()">
-                    中/EN
-                </button>
-            </div>
+<body>
+    <div class="container">
+        <div class="lang-switch">
+            <button class="lang-btn active" onclick="switchLang('zh')">中文</button>
+            <button class="lang-btn" onclick="switchLang('en')">English</button>
         </div>
 
-        <!-- 主测速卡片 -->
-        <div class="glass-card rounded-3xl p-8 w-full max-w-xl slide-up">
-            <!-- 测速圆环 -->
-            <div class="flex justify-center mb-8">
-                <div class="speed-circle">
-                    <svg width="220" height="220" viewBox="0 0 220 220">
-                        <!-- 背景圆环 -->
-                        <circle cx="110" cy="110" r="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="8"/>
-                        <!-- 进度圆环 -->
-                        <circle id="progressRing" class="progress-ring" cx="110" cy="110" r="100" fill="none" 
-                                stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"
-                                stroke-dasharray="628" stroke-dashoffset="628"/>
-                        <defs>
-                            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#3b82f6"/>
-                                <stop offset="100%" stop-color="#8b5cf6"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                    <!-- 中心显示 -->
-                    <div class="absolute inset-0 flex flex-col items-center justify-center">
-                        <div id="speedValue" class="text-5xl font-bold">--</div>
-                        <div id="speedUnit" class="text-lg text-gray-400 mt-1">Mbps</div>
-                        <div id="testStatus" class="text-sm text-gray-500 mt-2">准备就绪</div>
-                    </div>
-                </div>
+        <h1 id="title">网速测试</h1>
+        <p class="desc" id="desc">测试您的网络下载速度、上传速度和网络时延</p>
+
+        <button id="testBtn" onclick="startTest()">开始测试</button>
+
+        <!-- 测速状态 -->
+        <div class="status" id="status"></div>
+
+        <!-- 测速结果区域（测试完成后显示） -->
+        <div class="result-container" id="resultContainer">
+            <div class="result-item">
+                <span class="result-label" id="downloadLabel">下载速度</span>
+                <span class="result-value" id="downloadResult">-</span>
             </div>
-
-            <!-- 进度条 -->
-            <div id="progressContainer" class="mb-6 hidden">
-                <div class="flex justify-between text-sm text-gray-400 mb-2">
-                    <span id="progressText">正在测试...</span>
-                    <span id="progressPercent">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
-                </div>
+            <div class="result-item">
+                <span class="result-label" id="uploadLabel">上传速度</span>
+                <span class="result-value" id="uploadResult">-</span>
             </div>
-
-            <!-- 开始按钮 -->
-            <div id="startContainer" class="flex justify-center mb-8">
-                <button id="startBtn" class="btn-start px-12 py-4 rounded-full text-lg font-semibold text-white" onclick="startSpeedTest()">
-                    <span id="startBtnText">开始测试</span>
-                </button>
+            <div class="result-item">
+                <span class="result-label" id="pingLabel">网络时延</span>
+                <span class="result-value" id="pingResult">-</span>
             </div>
-
-            <!-- 结果展示 -->
-            <div id="resultsContainer" class="hidden">
-                <div class="grid grid-cols-3 gap-4 mb-6">
-                    <div class="result-card rounded-xl p-4 text-center">
-                        <div class="text-gray-400 text-sm mb-1" id="labelPing">延迟</div>
-                        <div class="text-2xl font-bold text-green-400" id="pingResult">--</div>
-                        <div class="text-xs text-gray-500">ms</div>
-                    </div>
-                    <div class="result-card rounded-xl p-4 text-center">
-                        <div class="text-gray-400 text-sm mb-1" id="labelJitter">抖动</div>
-                        <div class="text-2xl font-bold text-yellow-400" id="jitterResult">--</div>
-                        <div class="text-xs text-gray-500">ms</div>
-                    </div>
-                    <div class="result-card rounded-xl p-4 text-center">
-                        <div class="text-gray-400 text-sm mb-1" id="labelUpload">上传</div>
-                        <div class="text-2xl font-bold text-blue-400" id="uploadResult">--</div>
-                        <div class="text-xs text-gray-500" id="uploadUnit">Mbps</div>
-                    </div>
-                </div>
-
-                <!-- 重新测试按钮 -->
-                <div class="flex justify-center">
-                    <button class="px-8 py-3 bg-white/10 rounded-full hover:bg-white/20 transition font-medium" onclick="resetTest()">
-                        <span id="btnRetry">重新测试</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- 状态信息 -->
-            <div class="mt-6 pt-6 border-t border-white/10">
-                <div class="flex items-center justify-center gap-2 text-sm text-gray-500">
-                    <div class="status-dot bg-green-400"></div>
-                    <span id="serverInfo">连接至 Cloudflare 全球网络</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 底部说明 -->
-        <div class="mt-6 text-center text-gray-500 text-sm fade-in">
-            <p id="disclaimer">测试结果仅供参考，实际网速可能因网络环境波动</p>
         </div>
     </div>
 
     <script>
-        // ============================================
-        // 【重要声明】
-        // 本测速工具100%使用真实网络请求实现
-        // 无任何模拟数据、随机数或假数据
-        // 所有测速结果均来自真实的网络传输
-        // ============================================
-
-        // 全局状态
-        let currentUnit = 'mbps'; // 'mbps' or 'mbs'
-        let currentLang = 'zh';   // 'zh' or 'en'
-        let isTesting = false;
-
-        // 测速配置
-        const CONFIG = {
-            // Ping测试配置
-            pingCount: 8,           // 测试次数（去掉最高最低后取平均）
-            pingUrl: 'https://httpbin.org/status/204',  // 空响应，用于测试延迟
-            
-            // 下载测试配置
-            downloadFile: 'https://speed.cloudflare.com/__down?bytes=5000000',  // Cloudflare官方5MB测试文件
-            downloadSize: 5000000,  // 5MB 文件大小（字节）
-            
-            // 上传测试配置
-            uploadSize: 3000000,    // 3MB 上传数据大小
-            uploadUrl: 'https://httpbin.org/post',     // 支持CORS的上传接口
-            
-            // 超时设置
-            timeout: 30000          // 30秒超时
-        };
-
-        // 多语言文本
-        const translations = {
+        // 多语言配置
+        const langData = {
             zh: {
-                appTitle: '网络测速',
-                startBtn: '开始测试',
-                testing: '测试中...',
-                labelPing: '延迟',
-                labelJitter: '抖动',
-                labelUpload: '上传',
-                btnRetry: '重新测试',
-                serverInfo: '连接至 Cloudflare 全球网络',
-                disclaimer: '测试结果仅供参考，实际网速可能因网络环境波动',
-                statusReady: '准备就绪',
-                statusPing: '测试延迟中...',
-                statusDownload: '测试下载速度...',
-                statusUpload: '测试上传速度...',
-                statusComplete: '测试完成',
-                progressPing: '延迟测试',
-                progressDownload: '下载测试',
-                progressUpload: '上传测试'
+                title: "网速测试",
+                desc: "测试您的网络下载速度、上传速度和网络时延",
+                testBtn: "开始测试",
+                testing: "测试中，请稍候...",
+                testDownload: "正在测试下载速度...",
+                testUpload: "正在测试上传速度...",
+                testPing: "正在测试网络时延...",
+                testComplete: "测试完成！",
+                downloadLabel: "下载速度",
+                uploadLabel: "上传速度",
+                pingLabel: "网络时延",
+                unitDownload: "Mbps",
+                unitUpload: "Mbps",
+                unitPing: "ms"
             },
             en: {
-                appTitle: 'Speed Test',
-                startBtn: 'Start Test',
-                testing: 'Testing...',
-                labelPing: 'Ping',
-                labelJitter: 'Jitter',
-                labelUpload: 'Upload',
-                btnRetry: 'Test Again',
-                serverInfo: 'Connected to Cloudflare Global Network',
-                disclaimer: 'Results for reference only, actual speed may vary due to network conditions',
-                statusReady: 'Ready',
-                statusPing: 'Testing latency...',
-                statusDownload: 'Testing download speed...',
-                statusUpload: 'Testing upload speed...',
-                statusComplete: 'Test Complete',
-                progressPing: 'Ping Test',
-                progressDownload: 'Download Test',
-                progressUpload: 'Upload Test'
+                title: "Network Speed Test",
+                desc: "Test your download speed, upload speed and latency",
+                testBtn: "Start Test",
+                testing: "Testing, please wait...",
+                testDownload: "Testing download speed...",
+                testUpload: "Testing upload speed...",
+                testPing: "Testing latency...",
+                testComplete: "Test completed!",
+                downloadLabel: "Download Speed",
+                uploadLabel: "Upload Speed",
+                pingLabel: "Latency",
+                unitDownload: "Mbps",
+                unitUpload: "Mbps",
+                unitPing: "ms"
             }
         };
 
-        // 初始化：检测浏览器语言
-        (function init() {
-            const browserLang = navigator.language || navigator.userLanguage;
-            if (browserLang.toLowerCase().startsWith('zh')) {
-                currentLang = 'zh';
-            } else {
-                currentLang = 'en';
-            }
-            updateLanguage();
-        })();
+        let currentLang = 'zh';
+        let testResult = {
+            download: 0,
+            upload: 0,
+            ping: 0
+        };
 
-        // ============================================
-        // 单位切换功能
-        // ============================================
-        function toggleUnit(unit) {
-            currentUnit = unit;
-            document.getElementById('btnMbps').classList.toggle('active', unit === 'mbps');
-            document.getElementById('btnMBs').classList.toggle('active', unit === 'mbs');
+        // 切换语言
+        function switchLang(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');
             
-            const unitText = unit === 'mbps' ? 'Mbps' : 'MB/s';
-            document.getElementById('speedUnit').textContent = unitText;
-            document.getElementById('uploadUnit').textContent = unitText;
-        }
-
-        // ============================================
-        // 语言切换功能
-        // ============================================
-        function toggleLanguage() {
-            currentLang = currentLang === 'zh' ? 'en' : 'zh';
-            updateLanguage();
-        }
-
-        function updateLanguage() {
-            const t = translations[currentLang];
-            document.getElementById('appTitle').textContent = t.appTitle;
-            document.getElementById('startBtnText').textContent = isTesting ? t.testing : t.startBtn;
-            document.getElementById('labelPing').textContent = t.labelPing;
-            document.getElementById('labelJitter').textContent = t.labelJitter;
-            document.getElementById('labelUpload').textContent = t.labelUpload;
-            document.getElementById('btnRetry').textContent = t.btnRetry;
-            document.getElementById('serverInfo').textContent = t.serverInfo;
-            document.getElementById('disclaimer').textContent = t.disclaimer;
-            if (!isTesting) {
-                document.getElementById('testStatus').textContent = t.statusReady;
-            }
-        }
-
-        // ============================================
-        // 速度单位转换
-        // ============================================
-        function formatSpeed(bps) {
-            // bps = bits per second
-            if (currentUnit === 'mbps') {
-                // 转换为 Mbps (Megabits per second)
-                return (bps / 1000000).toFixed(2);
-            } else {
-                // 转换为 MB/s (Megabytes per second)
-                return (bps / 8 / 1000000).toFixed(2);
-            }
-        }
-
-        // ============================================
-        // 更新进度圆环
-        // ============================================
-        function updateProgress(percent) {
-            const circumference = 2 * Math.PI * 100;
-            const offset = circumference - (percent / 100) * circumference;
-            document.getElementById('progressRing').style.strokeDashoffset = offset;
-        }
-
-        // ============================================
-        // 【真实】Ping 测试函数
-        // 使用XMLHttpRequest真实请求httpbin.org的空响应
-        // ============================================
-        async function testPing() {
-            const times = [];
+            document.getElementById('title').textContent = langData[lang].title;
+            document.getElementById('desc').textContent = langData[lang].desc;
+            document.getElementById('testBtn').textContent = langData[lang].testBtn;
+            document.getElementById('downloadLabel').textContent = langData[lang].downloadLabel;
+            document.getElementById('uploadLabel').textContent = langData[lang].uploadLabel;
+            document.getElementById('pingLabel').textContent = langData[lang].pingLabel;
             
-            for (let i = 0; i < CONFIG.pingCount; i++) {
+            // 如果已有结果，刷新单位显示
+            if(testResult.download > 0) showResults();
+        }
+
+        // 统一显示状态
+        function setStatus(text) {
+            document.getElementById('status').textContent = text;
+        }
+
+        // 显示最终结果
+        function showResults() {
+            const lang = langData[currentLang];
+            document.getElementById('downloadResult').textContent = `${testResult.download.toFixed(2)} ${lang.unitDownload}`;
+            document.getElementById('uploadResult').textContent = `${testResult.upload.toFixed(2)} ${lang.unitUpload}`;
+            document.getElementById('pingResult').textContent = `${testResult.ping.toFixed(0)} ${lang.unitPing}`;
+            document.getElementById('resultContainer').style.display = 'block';
+        }
+
+        // 按钮状态控制
+        function setButtonDisabled(disabled) {
+            const btn = document.getElementById('testBtn');
+            btn.disabled = disabled;
+            btn.classList.toggle('testing', disabled);
+        }
+
+        // 测试时延（Ping）
+        async function testLatency() {
+            setStatus(langData[currentLang].testPing);
+            const times = 5;
+            let total = 0;
+            for(let i=0; i<times; i++) {
                 const start = performance.now();
-                
-                try {
-                    await new Promise((resolve, reject) => {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('GET', CONFIG.pingUrl + '?t=' + Date.now() + '-' + i, true);
-                        xhr.timeout = 5000;
-                        
-                        xhr.onload = () => {
-                            if (xhr.status >= 200 && xhr.status < 300) {
-                                resolve();
-                            } else {
-                                reject(new Error('HTTP ' + xhr.status));
-                            }
-                        };
-                        xhr.onerror = () => reject(new Error('Network error'));
-                        xhr.ontimeout = () => reject(new Error('Timeout'));
-                        xhr.send();
-                    });
-                    
-                    const end = performance.now();
-                    times.push(end - start);
-                    
-                } catch (e) {
-                    console.log('Ping attempt', i + 1, 'failed:', e.message);
-                    // 失败时跳过这次
-                    continue;
-                }
-                
-                // 更新进度
-                updateProgress((i + 1) / CONFIG.pingCount * 20); // Ping占20%进度
-                await new Promise(r => setTimeout(r, 50));
+                await fetch(`?t=${Date.now()}`, {cache: 'no-store'});
+                total += performance.now() - start;
             }
-            
-            if (times.length < 3) {
-                return { ping: 0, jitter: 0 };
-            }
-            
-            // 去掉最高和最低值
-            times.sort((a, b) => a - b);
-            const trimmed = times.slice(1, -1);
-            
-            // 计算平均值
-            const avg = trimmed.reduce((a, b) => a + b, 0) / trimmed.length;
-            
-            // 计算抖动（方差）
-            const variance = trimmed.reduce((a, b) => a + Math.pow(b - avg, 2), 0) / trimmed.length;
-            const jitter = Math.sqrt(variance);
-            
-            return {
-                ping: Math.round(avg),
-                jitter: Math.round(jitter)
-            };
+            testResult.ping = total / times;
         }
 
-        // ============================================
-        // 【真实】下载速度测试函数
-        // 使用XMLHttpRequest从Cloudflare CDN下载真实的测试文件
-        // ============================================
+        // 测试下载速度（优化耗时）
         async function testDownload() {
-            return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                const url = CONFIG.downloadFile + '?t=' + Date.now();
-                
-                let startTime;
-                let speeds = [];
-                let lastLoaded = 0;
-                let lastTime = 0;
-                
-                xhr.open('GET', url, true);
-                xhr.responseType = 'arraybuffer';
-                xhr.timeout = CONFIG.timeout;
-                
-                xhr.onloadstart = () => {
-                    startTime = performance.now();
-                    lastTime = startTime;
-                };
-                
-                xhr.onprogress = (event) => {
-                    if (event.lengthComputable) {
-                        const now = performance.now();
-                        const elapsed = (now - lastTime) / 1000;
-                        const loaded = event.loaded - lastLoaded;
-                        
-                        if (elapsed > 0.1 && loaded > 0) {
-                            // 计算瞬时速度 (bps)
-                            const bps = (loaded * 8) / elapsed;
-                            speeds.push(bps);
-                            
-                            // 实时显示速度
-                            document.getElementById('speedValue').textContent = formatSpeed(bps);
-                        }
-                        
-                        lastLoaded = event.loaded;
-                        lastTime = now;
-                        
-                        // 更新进度 20%-70%
-                        const progress = 20 + (event.loaded / event.total * 50);
-                        updateProgress(progress);
-                        document.getElementById('progressFill').style.width = (event.loaded / event.total * 100) + '%';
-                        document.getElementById('progressPercent').textContent = Math.round(event.loaded / event.total * 100) + '%';
-                    }
-                };
-                
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        const totalTime = (performance.now() - startTime) / 1000;
-                        const totalBytes = xhr.response.byteLength;
-                        
-                        // 计算平均速度 (bps)
-                        const avgBps = (totalBytes * 8) / totalTime;
-                        
-                        resolve(avgBps);
-                    } else {
-                        reject(new Error('Download failed: HTTP ' + xhr.status));
-                    }
-                };
-                
-                xhr.onerror = () => reject(new Error('Network error during download'));
-                xhr.ontimeout = () => reject(new Error('Download timeout'));
-                
-                xhr.send();
-            });
+            setStatus(langData[currentLang].testDownload);
+            const url = `https://speed.cloudflare.com/__down?bytes=1000000&t=${Date.now()}`;
+            const start = performance.now();
+            const response = await fetch(url);
+            await response.blob();
+            const duration = (performance.now() - start) / 1000;
+            const sizeMb = 1000000 * 8 / 1000000;
+            testResult.download = sizeMb / duration;
         }
 
-        // ============================================
-        // 【真实】上传速度测试函数
-        // 生成真实二进制数据并POST到支持CORS的接口
-        // ============================================
+        // 测试上传速度（优化耗时）
         async function testUpload() {
-            // 生成真实的二进制测试数据
-            const data = new Uint8Array(CONFIG.uploadSize);
-            // 填充非零数据确保真实传输
-            for (let i = 0; i < CONFIG.uploadSize; i++) {
-                data[i] = i % 256;
-            }
-            
-            return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', CONFIG.uploadUrl, true);
-                xhr.timeout = CONFIG.timeout;
-                
-                let startTime;
-                let speeds = [];
-                
-                xhr.upload.onloadstart = () => {
-                    startTime = performance.now();
-                };
-                
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable) {
-                        const now = performance.now();
-                        const elapsed = (now - startTime) / 1000;
-                        
-                        if (elapsed > 0) {
-                            const bps = (event.loaded * 8) / elapsed;
-                            document.getElementById('speedValue').textContent = formatSpeed(bps);
-                        }
-                        
-                        // 更新进度 70%-100%
-                        const progress = 70 + (event.loaded / event.total * 30);
-                        updateProgress(progress);
-                        document.getElementById('progressFill').style.width = (event.loaded / event.total * 100) + '%';
-                        document.getElementById('progressPercent').textContent = Math.round(event.loaded / event.total * 100) + '%';
-                    }
-                };
-                
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        const totalTime = (performance.now() - startTime) / 1000;
-                        const avgBps = (CONFIG.uploadSize * 8) / totalTime;
-                        resolve(avgBps);
-                    } else {
-                        reject(new Error('Upload failed: HTTP ' + xhr.status));
-                    }
-                };
-                
-                xhr.onerror = () => reject(new Error('Network error during upload'));
-                xhr.ontimeout = () => reject(new Error('Upload timeout'));
-                
-                xhr.send(data);
-            });
+            setStatus(langData[currentLang].testUpload);
+            const url = `https://speed.cloudflare.com/__up?t=${Date.now()}`;
+            const data = new Blob([new Uint8Array(300000)]);
+            const start = performance.now();
+            await fetch(url, {method: 'POST', body: data});
+            const duration = (performance.now() - start) / 1000;
+            const sizeMb = 300000 * 8 / 1000000;
+            testResult.upload = sizeMb / duration;
         }
 
-        // ============================================
-        // 主测速流程
-        // ============================================
-        async function startSpeedTest() {
-            if (isTesting) return;
-            isTesting = true;
-            
-            const t = translations[currentLang];
-            
-            // UI更新
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('startBtnText').textContent = t.testing;
-            document.getElementById('startContainer').classList.add('hidden');
-            document.getElementById('progressContainer').classList.remove('hidden');
-            document.getElementById('resultsContainer').classList.add('hidden');
-            document.getElementById('speedValue').textContent = '--';
-            
-            let pingResult, jitterResult, downloadResult, uploadResult;
-            
+        // 一次性执行全部测试（核心优化）
+        async function startTest() {
+            const btn = document.getElementById('testBtn');
+            if(btn.disabled) return;
+
+            setButtonDisabled(true);
+            document.getElementById('resultContainer').style.display = 'none';
+            setStatus(langData[currentLang].testing);
+
             try {
-                // ========== 阶段1: Ping测试 ==========
-                document.getElementById('testStatus').textContent = t.statusPing;
-                document.getElementById('progressText').textContent = t.progressPing;
-                const pingData = await testPing();
-                pingResult = pingData.ping;
-                jitterResult = pingData.jitter;
+                // 顺序：时延 → 下载 → 上传（总耗时最短）
+                await testLatency();
+                await testDownload();
+                await testUpload();
                 
-                // ========== 阶段2: 下载测试 ==========
-                document.getElementById('testStatus').textContent = t.statusDownload;
-                document.getElementById('progressText').textContent = t.progressDownload;
-                downloadResult = await testDownload();
-                
-                // ========== 阶段3: 上传测试 ==========
-                document.getElementById('testStatus').textContent = t.statusUpload;
-                document.getElementById('progressText').textContent = t.progressUpload;
-                uploadResult = await testUpload();
-                
-                // ========== 完成 ==========
-                document.getElementById('testStatus').textContent = t.statusComplete;
-                updateProgress(100);
-                
-                // 显示最终下载速度
-                document.getElementById('speedValue').textContent = formatSpeed(downloadResult);
-                
-                // 显示结果
-                document.getElementById('pingResult').textContent = pingResult || '-';
-                document.getElementById('jitterResult').textContent = jitterResult || '-';
-                document.getElementById('uploadResult').textContent = formatSpeed(uploadResult);
-                
-                document.getElementById('progressContainer').classList.add('hidden');
-                document.getElementById('resultsContainer').classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Speed test error:', error);
-                document.getElementById('testStatus').textContent = '测试失败: ' + error.message;
-                document.getElementById('speedValue').textContent = 'ERR';
+                setStatus(langData[currentLang].testComplete);
+                showResults();
+            } catch(e) {
+                setStatus(currentLang === 'zh' ? '测试失败，请刷新重试' : 'Test failed, please refresh');
+                console.error(e);
+            } finally {
+                setButtonDisabled(false);
             }
-            
-            isTesting = false;
-            document.getElementById('startBtn').disabled = false;
-            updateLanguage();
         }
-
-        // ============================================
-        // 重置测试
-        // ============================================
-        function resetTest() {
-            const t = translations[currentLang];
-            
-            document.getElementById('resultsContainer').classList.add('hidden');
-            document.getElementById('progressContainer').classList.add('hidden');
-            document.getElementById('startContainer').classList.remove('hidden');
-            document.getElementById('speedValue').textContent = '--';
-            document.getElementById('testStatus').textContent = t.statusReady;
-            document.getElementById('progressFill').style.width = '0%';
-            document.getElementById('progressPercent').textContent = '0%';
-            updateProgress(0);
-        }
-
-        // ============================================
-        // 【代码验证】
-        // 以下代码用于验证本文件不含任何模拟数据
-        // 本文件中没有使用：
-        // - Math.random() 生成随机速度
-        // - 硬编码的假速度数据
-        // - setTimeout模拟延迟
-        // 所有测速均来自真实XMLHttpRequest网络请求
-        // ============================================
     </script>
 </body>
 </html>

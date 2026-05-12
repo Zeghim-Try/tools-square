@@ -3,56 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>真实专业测速-无模拟假数据</title>
+<title>网络真实测速</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;}
-body{background:#0b1320;color:#fff;font-family:system-ui;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;}
-.card{background:#152030;border-radius:16px;padding:40px 30px;text-align:center;width:100%;max-width:420px;}
-h2{margin-bottom:30px;color:#40a9ff;}
-.info{margin:18px 0;font-size:18px;}
-.val{font-size:38px;font-weight:bold;color:#36cbcb;margin:8px 0;}
-button{margin-top:20px;padding:14px 40px;border:0;border-radius:10px;background:#40a9ff;color:#fff;font-size:17px;cursor:pointer;}
-button:disabled{background:#555;cursor:not-allowed;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  min-height:100vh;
+  background:#0f1722;
+  display:flex;align-items:center;justify-content:center;
+  font-family:sans-serif;color:#fff;
+}
+.card{
+  background:#162030;padding:40px 30px;border-radius:16px;
+  width:min(90%,380px);text-align:center;
+}
+.title{color:#4299e1;font-size:24px;margin-bottom:30px;font-weight:bold}
+.item{margin:20px 0;font-size:20px}
+.label{color:#ccc;font-size:16px;margin-bottom:6px}
+.val{color:#48bb78;font-size:28px;font-weight:bold}
+.btn{
+  margin-top:30px;padding:14px 40px;font-size:18px;
+  background:#3182ce;color:white;border:none;border-radius:8px;
+  cursor:pointer
+}
+.btn:disabled{opacity:0.6;cursor:not-allowed}
 </style>
 </head>
 <body>
 <div class="card">
-    <h2>网络真实测速</h2>
-    <div class="info">延迟 Ping<div class="val" id="ping">--</div></div>
-    <div class="info">下载 Mbps<div class="val" id="down">--</div></div>
-    <div class="info">上传 Mbps<div class="val" id="up">--</div></div>
-    <button id="btn" onclick="runSpeedTest()">开始测速</button>
+  <div class="title">网络真实测速</div>
+  <div class="item">
+    <div class="label">往返延迟</div>
+    <div class="val" id="ping">等待测速</div>
+  </div>
+  <div class="item">
+    <div class="label">下载速度 Mbps</div>
+    <div class="val" id="download">等待测速</div>
+  </div>
+  <div class="item">
+    <div class="label">上传速度 Mbps</div>
+    <div class="val" id="upload">等待测速</div>
+  </div>
+  <button class="btn" id="startBtn" onclick="startTest()">开始测速</button>
 </div>
 
-<!-- 引入正规真实测速SDK，不是自己写模拟算法 -->
-<script src="https://cdn.jsdelivr.net/npm/speedtest-net@2.1.0/dist/speedtest.min.js"></script>
 <script>
-const pingEl = document.getElementById('ping');
-const downEl = document.getElementById('down');
-const upEl = document.getElementById('up');
-const btn = document.getElementById('btn');
+const pingEl = document.getElementById('ping')
+const downEl = document.getElementById('download')
+const upEl = document.getElementById('upload')
+const btn = document.getElementById('startBtn')
 
-async function runSpeedTest(){
-    btn.disabled = true;
-    pingEl.innerText = "测速中";
-    downEl.innerText = "测速中";
-    upEl.innerText = "测速中";
+// 可靠延迟检测
+async function getPing() {
+  try {
+    const start = performance.now()
+    // 用无跨域限制的稳定CDN
+    await fetch('https://cdnjs.cloudflare.com/ajax/libs/webfont/1.6.28/webfont.js', {cache: 'no-store', mode: 'no-cors'})
+    return Math.round(performance.now() - start)
+  } catch {
+    return null
+  }
+}
 
-    try{
-        const st = new Speedtest();
-        st.on('ping', e=> pingEl.innerText = e.latency + ' ms');
-        st.on('download', e=> downEl.innerText = (e.download/1000).toFixed(2));
-        st.on('upload', e=> upEl.innerText = (e.upload/1000).toFixed(2));
-        await st.start();
-    }catch(err){
-        pingEl.innerText = "失败";
-        downEl.innerText = "失败";
-        upEl.innerText = "失败";
-    }
-    btn.disabled = false;
+// 纯下载测速 高成功率
+async function getDownload() {
+  try {
+    const url = `https://speed.cloudflare.com/__down?bytes=15000000&t=${Date.now()}`
+    const start = performance.now()
+    const res = await fetch(url, {cache: 'no-store'})
+    const blob = await res.blob()
+    const sizeMb = blob.size * 8 / 1024 / 1024
+    const sec = (performance.now() - start) / 1000
+    return (sizeMb / sec).toFixed(2)
+  } catch {
+    return null
+  }
+}
+
+// 极简兼容上传测速
+async function getUpload() {
+  try {
+    const buf = new ArrayBuffer(1*1024*1024)
+    const start = performance.now()
+    await fetch('https://httpbin.org/delay/0', {method:'POST', body:buf})
+    const sizeMb = buf.byteLength *8 /1024/1024
+    const sec = (performance.now()-start)/1000
+    return (sizeMb / sec).toFixed(2)
+  } catch {
+    return null
+  }
+}
+
+async function startTest() {
+  btn.disabled = true
+  btn.innerText = '测速进行中...'
+  pingEl.innerText = '检测中'
+  downEl.innerText = '检测中'
+  upEl.innerText = '检测中'
+
+  const ping = await getPing()
+  const down = await getDownload()
+  const up = await getUpload()
+
+  pingEl.innerText = ping ? `${ping} ms` : '无法获取'
+  downEl.innerText = down ? `${down}` : '测速失败'
+  upEl.innerText = up ? `${up}` : '测速失败'
+
+  btn.disabled = false
+  btn.innerText = '重新测速'
 }
 </script>
-</div>
 </body>
 </html>
-

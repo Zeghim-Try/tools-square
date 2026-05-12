@@ -234,6 +234,9 @@
                 testBtnStart: "开始测试",
                 testBtnRestart: "重新测试",
                 testing: "测试中，请稍候...",
+                testDownload: "正在测试下载速度...",
+                testUpload: "正在测试上传速度...",
+                testPing: "正在测试网络时延...",
                 testComplete: "测试完成！",
                 downloadLabel: "下载速度",
                 uploadLabel: "上传速度",
@@ -249,13 +252,16 @@
                 desc: "Test your download speed, upload speed and latency",
                 testBtnStart: "Start Test",
                 testBtnRestart: "Test Again",
-                testing: "Testing, please wait...",
-                testComplete: "Test completed!",
+                testing: "Testing...",
+                testDownload: "Testing download...",
+                testUpload: "Testing upload...",
+                testPing: "Testing latency...",
+                testComplete: "Completed!",
                 downloadLabel: "Download",
                 uploadLabel: "Upload",
                 pingLabel: "Latency",
                 historyTitle: "History (Last 5)",
-                testFailed: "Test failed, please refresh",
+                testFailed: "Test failed",
                 unitMbps: "Mbps",
                 unitMBs: "MB/s",
                 unitMs: "ms"
@@ -269,10 +275,8 @@
 
         function switchLang(lang) {
             currentLang = lang;
-            document.documentElement.lang = lang;
             document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
             document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');
-
             const t = langData[lang];
             document.getElementById('title').textContent = t.title;
             document.getElementById('desc').textContent = t.desc;
@@ -280,9 +284,8 @@
             document.getElementById('uploadLabel').textContent = t.uploadLabel;
             document.getElementById('pingLabel').textContent = t.pingLabel;
             document.getElementById('historyTitle').textContent = t.historyTitle;
-
             const btn = document.getElementById('testBtn');
-            btn.textContent = btn.disabled ? t.testBtnRestart : t.testBtnStart;
+            btn.textContent = btn.disabled ? t.testing : t.testBtnRestart;
             refreshResults();
             renderHistory();
         }
@@ -318,11 +321,7 @@
 
         function saveHistory() {
             const now = new Date().toLocaleString();
-            const item = {
-                ...testResult,
-                time: now,
-                unit: currentUnit
-            };
+            const item = { ...testResult, time: now };
             testHistory.unshift(item);
             if (testHistory.length > 5) testHistory = testHistory.slice(0, 5);
             localStorage.setItem('speedHistory', JSON.stringify(testHistory));
@@ -338,10 +337,7 @@
                 const dl = currentUnit === 'mbps' ? item.download.toFixed(2) : (item.download/8).toFixed(2);
                 const ul = currentUnit === 'mbps' ? item.upload.toFixed(2) : (item.upload/8).toFixed(2);
                 const unit = langData[currentLang][currentUnit === 'mbps' ? 'unitMbps' : 'unitMBs'];
-                div.innerHTML = `
-                    <span>${item.time}</span>
-                    <span>↓${dl} ${unit} ↑${ul} ${unit} ${item.ping.toFixed(0)}ms</span>
-                `;
+                div.innerHTML = `<span>${item.time}</span><span>↓${dl} ${unit} ↑${ul} ${unit} ${item.ping.toFixed(0)}ms</span>`;
                 list.appendChild(div);
             });
         }
@@ -353,45 +349,48 @@
             btn.textContent = disabled ? langData[currentLang].testing : langData[currentLang].testBtnRestart;
         }
 
+        // 时延测试（稳定版）
         async function testLatency() {
             setStatus(langData[currentLang].testPing);
-            let total = 0;
-            for (let i=0; i<5; i++) {
-                const s = performance.now();
-                await fetch(`?t=${Date.now()}`, {cache: 'no-store'});
-                total += performance.now() - s;
+            let times = [];
+            for (let i = 0; i < 6; i++) {
+                const start = performance.now();
+                await fetch(`https://speed.cloudflare.com/__down?bytes=1000&t=${Date.now()}`, { cache: "no-store" });
+                times.push(performance.now() - start);
             }
-            testResult.ping = total / 5;
+            times.sort();
+            times = times.slice(1, 4);
+            testResult.ping = times.reduce((a, b) => a + b, 0) / times.length;
         }
 
+        // 5G/高速宽带专用 30MB 下载
         async function testDownload() {
             setStatus(langData[currentLang].testDownload);
-            const url = `https://speed.cloudflare.com/__down?bytes=1000000&t=${Date.now()}`;
-            const s = performance.now();
-            const res = await fetch(url);
-            await res.blob();
-            const dur = (performance.now() - s) / 1000;
-            testResult.download = (1000000 * 8 / 1000000) / dur;
+            const size = 30 * 1024 * 1024;
+            const url = `https://speed.cloudflare.com/__down?bytes=${size}&t=${Date.now()}`;
+            const start = performance.now();
+            const resp = await fetch(url);
+            await resp.blob();
+            const duration = (performance.now() - start) / 1000;
+            testResult.download = (size * 8 / 1000 / 1000) / duration;
         }
 
+        // 5G/高速宽带专用 5MB 上传
         async function testUpload() {
             setStatus(langData[currentLang].testUpload);
+            const size = 5 * 1024 * 1024;
+            const data = new Uint8Array(size);
             const url = `https://speed.cloudflare.com/__up?t=${Date.now()}`;
-            const data = new Blob([new Uint8Array(300000)]);
-            const s = performance.now();
-            await fetch(url, {method: 'POST', body: data});
-            const dur = (performance.now() - s) / 1000;
-            testResult.upload = (300000 * 8 / 1000000) / dur;
+            const start = performance.now();
+            await fetch(url, { method: "POST", body: data });
+            const duration = (performance.now() - start) / 1000;
+            testResult.upload = (size * 8 / 1000 / 1000) / duration;
         }
 
         async function startTest() {
-            const btn = document.getElementById('testBtn');
-            if (btn.disabled) return;
-
+            if (document.getElementById('testBtn').disabled) return;
             setButtonDisabled(true);
             document.getElementById('resultContainer').style.display = 'none';
-            setStatus(langData[currentLang].testing);
-
             try {
                 await testLatency();
                 await testDownload();
@@ -401,7 +400,6 @@
                 saveHistory();
             } catch (e) {
                 setStatus(langData[currentLang].testFailed);
-                console.error(e);
             } finally {
                 setButtonDisabled(false);
             }

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI工具 - 网速测试</title>
+  <style>:root{--bg-main:#f5f7fa;--bg-card:#ffffff;--text-main:#333333;--text-desc:#666666;--btn-lang:#667eea;--border-color:#e5e7eb;--shadow:0 4px 20px rgba(0,0,0,0.08);}@media(prefers-color-scheme:dark){:root{--bg-main:#121212;--bg-card:#1e1e1e;--text-main:#e0e0e0;--text-desc:#a0a0a0;--border-color:#333333;}}*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}body{background:var(--bg-main);color:var(--text-main);min-height:100vh;}.container{max-width:600px;margin:0 auto;padding:20px;}.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;}.back-btn{background:none;border:none;font-size:18px;color:var(--text-main);cursor:pointer;}.lang-switch{display:flex;gap:8px;}.lang-btn{padding:6px 12px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-desc);border-radius:6px;cursor:pointer;font-size:14px;}.lang-btn.active{background:var(--btn-lang);color:white;border-color:var(--btn-lang);}.page-content{text-align:center;padding:80px 20px;color:var(--text-desc);font-size:18px;}</style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <button class="back-btn" onclick="window.location.href='index.html'">← 返回</button>
+      <div class="lang-switch">
+        <button class="lang-btn" onclick="switchLang('zh')">中文</button>
+        <button class="lang-btn" onclick="switchLang('en')">English</button>
+      </div>
+    </div>
+    <div class="page-content" id="content">内容正在路上</div>
+  </div>
+  <script>
+    const langData={zh:{contentComing:"内容正在路上"},en:{contentComing:"Content is coming soon"}};
+    let currentLang=localStorage.getItem('currentLang')||'zh';
+    function switchLang(lang){currentLang=lang;localStorage.setItem('currentLang',lang);document.getElementById('content').textContent=langData[currentLang].contentComing;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');}
+    window.onload=()=>{switchLang(currentLang);document.getElementById('content').textContent=langData[currentLang].contentComing;};
+  </script>
+</body>
+</html>

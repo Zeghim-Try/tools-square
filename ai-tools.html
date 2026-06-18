@@ -98,7 +98,11 @@
         noResult: "No tools in this category yet"
       }
     };
-    let lang = localStorage.getItem('currentLang') || 'zh';
+    let lang = localStorage.getItem('currentLang');
+    if (!lang) {
+      lang = navigator.language.startsWith('zh') ? 'zh' : 'en';
+      localStorage.setItem('currentLang', lang);
+    }
     let activeFilter = 'all';
 
     function getTagList() {

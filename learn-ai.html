@@ -81,7 +81,11 @@
       zh: { back: "返回", pageTitle: "📚 学习AI", pageSubtitle: "从入门到进阶，帮你真正用好AI", readMore: "阅读全文 →", empty: "文章即将更新，敬请期待" },
       en: { back: "Back", pageTitle: "📚 Learn AI", pageSubtitle: "From beginner to advanced — learn to truly use AI", readMore: "Read more →", empty: "Articles coming soon" }
     };
-    let lang = localStorage.getItem('currentLang') || 'zh';
+    let lang = localStorage.getItem('currentLang');
+    if (!lang) {
+      lang = navigator.language.startsWith('zh') ? 'zh' : 'en';
+      localStorage.setItem('currentLang', lang);
+    }
 
     function renderArticles() {
       const list = document.getElementById('articleList');

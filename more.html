@@ -145,7 +145,11 @@
         footer: "© 2026 Tools Square · Powered by AI"
       }
     };
-    let lang = localStorage.getItem('currentLang') || 'zh';
+    let lang = localStorage.getItem('currentLang');
+    if (!lang) {
+      lang = navigator.language.startsWith('zh') ? 'zh' : 'en';
+      localStorage.setItem('currentLang', lang);
+    }
 
     function updateStaticText() {
       const L = i18n[lang];

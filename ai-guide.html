@@ -78,7 +78,11 @@
       zh: { back: "返回", pageTitle: "🎯 AI攻略", pageSubtitle: "工具推荐 · 使用技巧 · 副业变现", readMore: "阅读全文 →", empty: "攻略即将更新，敬请期待" },
       en: { back: "Back", pageTitle: "🎯 AI Guides", pageSubtitle: "Tool Picks · Tips & Tricks · Side Hustle", readMore: "Read more →", empty: "Guides coming soon" }
     };
-    let lang = localStorage.getItem('currentLang') || 'zh';
+    let lang = localStorage.getItem('currentLang');
+    if (!lang) {
+      lang = navigator.language.startsWith('zh') ? 'zh' : 'en';
+      localStorage.setItem('currentLang', lang);
+    }
 
     function renderArticles() {
       const list = document.getElementById('articleList');

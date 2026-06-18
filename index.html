@@ -358,7 +358,11 @@
       }
     };
 
-    let currentLang = localStorage.getItem('currentLang') || 'zh';
+    let currentLang = localStorage.getItem('currentLang');
+    if (!currentLang) {
+      currentLang = navigator.language.startsWith('zh') ? 'zh' : 'en';
+      localStorage.setItem('currentLang', currentLang);
+    }
     let currentUnit = localStorage.getItem('currentUnit') || 'mbps';
     let isTesting = false;
 

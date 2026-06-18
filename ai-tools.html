@@ -3,25 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI工具 - 网速测试</title>
-  <style>:root{--bg-main:#f5f7fa;--bg-card:#ffffff;--text-main:#333333;--text-desc:#666666;--btn-lang:#667eea;--border-color:#e5e7eb;--shadow:0 4px 20px rgba(0,0,0,0.08);}@media(prefers-color-scheme:dark){:root{--bg-main:#121212;--bg-card:#1e1e1e;--text-main:#e0e0e0;--text-desc:#a0a0a0;--border-color:#333333;}}*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}body{background:var(--bg-main);color:var(--text-main);min-height:100vh;}.container{max-width:600px;margin:0 auto;padding:20px;}.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;}.back-btn{background:none;border:none;font-size:18px;color:var(--text-main);cursor:pointer;}.lang-switch{display:flex;gap:8px;}.lang-btn{padding:6px 12px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-desc);border-radius:6px;cursor:pointer;font-size:14px;}.lang-btn.active{background:var(--btn-lang);color:white;border-color:var(--btn-lang);}.page-content{text-align:center;padding:80px 20px;color:var(--text-desc);font-size:18px;}</style>
+  <title>AI工具导航 - 工具广场</title>
+  <meta name="description" content="精选最实用的AI工具，涵盖对话AI、绘图、编程、搜索、效率工具">
+  <style>
+    :root {
+      --bg-main: #f5f7fa;
+      --bg-card: #ffffff;
+      --text-main: #333333;
+      --text-desc: #666666;
+      --btn-lang: #667eea;
+      --border-color: #e5e7eb;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --tag-bg: #eef2ff;
+      --tag-color: #667eea;
+      --free-bg: #d1fae5;
+      --free-color: #065f46;
+      --paid-bg: #fee2e2;
+      --paid-color: #991b1b;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-main: #121212;
+        --bg-card: #1e1e1e;
+        --text-main: #e0e0e0;
+        --text-desc: #a0a0a0;
+        --border-color: #333333;
+        --tag-bg: #2d2f5e;
+        --tag-color: #a5b4fc;
+        --free-bg: #064e3b;
+        --free-color: #6ee7b7;
+        --paid-bg: #450a0a;
+        --paid-color: #fca5a5;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; }
+    .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .back-btn { background: none; border: none; font-size: 18px; color: var(--text-main); cursor: pointer; padding: 5px; }
+    .lang-switch { display: flex; gap: 8px; }
+    .lang-btn { padding: 6px 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-desc); border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .lang-btn.active { background: var(--btn-lang); color: white; border-color: var(--btn-lang); }
+    .page-header { margin-bottom: 25px; }
+    .page-title { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+    .page-subtitle { color: var(--text-desc); font-size: 15px; }
+    /* 分类筛选 */
+    .filter-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn { padding: 6px 14px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-desc); border-radius: 20px; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    .filter-btn.active { background: var(--btn-lang); color: white; border-color: var(--btn-lang); }
+    /* 工具卡片网格 */
+    .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+    .tool-card { background: var(--bg-card); border-radius: 14px; padding: 20px; box-shadow: var(--shadow); text-decoration: none; color: inherit; display: block; transition: transform 0.2s, box-shadow 0.2s; border: 1px solid var(--border-color); }
+    .tool-card:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    .tool-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .tool-name { font-size: 18px; font-weight: 600; }
+    .tool-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+    .badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 500; }
+    .badge-tag { background: var(--tag-bg); color: var(--tag-color); }
+    .badge-free { background: var(--free-bg); color: var(--free-color); }
+    .badge-paid { background: var(--paid-bg); color: var(--paid-color); }
+    .tool-desc { font-size: 14px; color: var(--text-desc); line-height: 1.6; }
+    .tool-link-hint { margin-top: 12px; font-size: 12px; color: var(--btn-lang); }
+    .empty-tip { text-align: center; padding: 60px 20px; color: var(--text-desc); }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="top-bar">
-      <button class="back-btn" onclick="window.location.href='index.html'">← 返回</button>
+      <button class="back-btn" onclick="window.location.href='index.html'">← <span id="backText">返回</span></button>
       <div class="lang-switch">
         <button class="lang-btn" onclick="switchLang('zh')">中文</button>
         <button class="lang-btn" onclick="switchLang('en')">English</button>
       </div>
     </div>
-    <div class="page-content" id="content">内容正在路上</div>
+    <div class="page-header">
+      <div class="page-title" id="pageTitle">🔧 AI工具导航</div>
+      <div class="page-subtitle" id="pageSubtitle">精选最实用的AI工具，每一个都经过筛选</div>
+    </div>
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="tools-grid" id="toolsGrid"></div>
   </div>
+
+  <script src="data.js"></script>
   <script>
-    const langData={zh:{contentComing:"内容正在路上"},en:{contentComing:"Content is coming soon"}};
-    let currentLang=localStorage.getItem('currentLang')||'zh';
-    function switchLang(lang){currentLang=lang;localStorage.setItem('currentLang',lang);document.getElementById('content').textContent=langData[currentLang].contentComing;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');}
-    window.onload=()=>{switchLang(currentLang);document.getElementById('content').textContent=langData[currentLang].contentComing;};
+    const i18n = {
+      zh: {
+        back: "返回", pageTitle: "🔧 AI工具导航", pageSubtitle: "精选最实用的AI工具，每一个都经过筛选",
+        all: "全部", free: "免费", paid: "付费", visit: "→ 访问网站",
+        noResult: "该分类暂无工具"
+      },
+      en: {
+        back: "Back", pageTitle: "🔧 AI Tools", pageSubtitle: "Curated AI tools, every one hand-picked",
+        all: "All", free: "Free", paid: "Paid", visit: "→ Visit",
+        noResult: "No tools in this category yet"
+      }
+    };
+    let lang = localStorage.getItem('currentLang') || 'zh';
+    let activeFilter = 'all';
+
+    function getTagList() {
+      const tags = new Set();
+      aiToolsList.forEach(t => tags.add(lang === 'zh' ? t.tag : t.tagEn));
+      return Array.from(tags);
+    }
+
+    function renderFilters() {
+      const bar = document.getElementById('filterBar');
+      const L = i18n[lang];
+      const tags = getTagList();
+      bar.innerHTML = `<button class="filter-btn ${activeFilter==='all'?'active':''}" onclick="setFilter('all')">${L.all}</button>`;
+      tags.forEach(tag => {
+        bar.innerHTML += `<button class="filter-btn ${activeFilter===tag?'active':''}" onclick="setFilter('${tag}')">${tag}</button>`;
+      });
+    }
+
+    function setFilter(f) { activeFilter = f; renderFilters(); renderTools(); }
+
+    function renderTools() {
+      const grid = document.getElementById('toolsGrid');
+      const L = i18n[lang];
+      let list = aiToolsList;
+      if (activeFilter !== 'all') {
+        list = list.filter(t => (lang === 'zh' ? t.tag : t.tagEn) === activeFilter);
+      }
+      if (list.length === 0) { grid.innerHTML = `<div class="empty-tip">${L.noResult}</div>`; return; }
+      grid.innerHTML = list.map(t => `
+        <a class="tool-card" href="${t.url}" target="_blank" rel="noopener">
+          <div class="tool-card-top">
+            <div class="tool-name">${lang === 'zh' ? t.name : t.nameEn}</div>
+            <div class="tool-badges">
+              <span class="badge badge-tag">${lang === 'zh' ? t.tag : t.tagEn}</span>
+              <span class="badge ${t.free ? 'badge-free' : 'badge-paid'}">${t.free ? L.free : L.paid}</span>
+            </div>
+          </div>
+          <div class="tool-desc">${lang === 'zh' ? t.desc : t.descEn}</div>
+          <div class="tool-link-hint">${L.visit} ${t.url.replace('https://','').replace('http://','')}</div>
+        </a>
+      `).join('');
+    }
+
+    function updateStaticText() {
+      const L = i18n[lang];
+      document.getElementById('backText').textContent = L.back;
+      document.getElementById('pageTitle').textContent = L.pageTitle;
+      document.getElementById('pageSubtitle').textContent = L.pageSubtitle;
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');
+    }
+
+    function switchLang(l) { lang = l; localStorage.setItem('currentLang', l); updateStaticText(); activeFilter = 'all'; renderFilters(); renderTools(); }
+
+    window.onload = () => { updateStaticText(); renderFilters(); renderTools(); };
   </script>
 </body>
 </html>

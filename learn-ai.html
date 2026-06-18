@@ -3,25 +3,133 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI工具 - 网速测试</title>
-  <style>:root{--bg-main:#f5f7fa;--bg-card:#ffffff;--text-main:#333333;--text-desc:#666666;--btn-lang:#667eea;--border-color:#e5e7eb;--shadow:0 4px 20px rgba(0,0,0,0.08);}@media(prefers-color-scheme:dark){:root{--bg-main:#121212;--bg-card:#1e1e1e;--text-main:#e0e0e0;--text-desc:#a0a0a0;--border-color:#333333;}}*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}body{background:var(--bg-main);color:var(--text-main);min-height:100vh;}.container{max-width:600px;margin:0 auto;padding:20px;}.top-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;}.back-btn{background:none;border:none;font-size:18px;color:var(--text-main);cursor:pointer;}.lang-switch{display:flex;gap:8px;}.lang-btn{padding:6px 12px;border:1px solid var(--border-color);background:var(--bg-card);color:var(--text-desc);border-radius:6px;cursor:pointer;font-size:14px;}.lang-btn.active{background:var(--btn-lang);color:white;border-color:var(--btn-lang);}.page-content{text-align:center;padding:80px 20px;color:var(--text-desc);font-size:18px;}</style>
+  <title>学习AI - 工具广场</title>
+  <meta name="description" content="AI学习文章合集，从入门到进阶，帮你真正用好AI">
+  <style>
+    :root {
+      --bg-main: #f5f7fa; --bg-card: #ffffff; --text-main: #333333; --text-desc: #666666;
+      --btn-lang: #667eea; --border-color: #e5e7eb; --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --tag-bg: #eef2ff; --tag-color: #667eea; --accent: #667eea;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg-main: #121212; --bg-card: #1e1e1e; --text-main: #e0e0e0; --text-desc: #a0a0a0; --border-color: #333333; --tag-bg: #2d2f5e; --tag-color: #a5b4fc; }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; }
+    .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .back-btn { background: none; border: none; font-size: 18px; color: var(--text-main); cursor: pointer; }
+    .lang-switch { display: flex; gap: 8px; }
+    .lang-btn { padding: 6px 12px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-desc); border-radius: 6px; cursor: pointer; font-size: 14px; transition: all 0.2s; }
+    .lang-btn.active { background: var(--btn-lang); color: white; border-color: var(--btn-lang); }
+    .page-header { margin-bottom: 25px; }
+    .page-title { font-size: 24px; font-weight: bold; margin-bottom: 8px; }
+    .page-subtitle { color: var(--text-desc); font-size: 15px; }
+    /* 文章列表 */
+    .article-list { display: flex; flex-direction: column; gap: 15px; }
+    .article-card { background: var(--bg-card); border-radius: 14px; padding: 22px; box-shadow: var(--shadow); cursor: pointer; border: 1px solid var(--border-color); transition: transform 0.2s, box-shadow 0.2s; }
+    .article-card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    .article-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .article-tag { font-size: 11px; padding: 3px 9px; border-radius: 10px; background: var(--tag-bg); color: var(--tag-color); font-weight: 500; }
+    .article-date { font-size: 12px; color: var(--text-desc); }
+    .article-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+    .article-desc { font-size: 14px; color: var(--text-desc); line-height: 1.6; }
+    .article-read-more { margin-top: 12px; font-size: 13px; color: var(--accent); }
+    /* 文章详情弹层 */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--bg-card); width: 100%; max-width: 700px; max-height: 85vh; border-radius: 20px 20px 0 0; padding: 30px 25px; overflow-y: auto; animation: slideUp 0.3s ease; }
+    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .modal-close { float: right; background: none; border: none; font-size: 22px; color: var(--text-desc); cursor: pointer; }
+    .modal-tag { font-size: 12px; padding: 3px 9px; border-radius: 10px; background: var(--tag-bg); color: var(--tag-color); display: inline-block; margin-bottom: 12px; }
+    .modal-title { font-size: 22px; font-weight: bold; margin-bottom: 8px; line-height: 1.4; }
+    .modal-date { font-size: 12px; color: var(--text-desc); margin-bottom: 20px; }
+    .modal-body { font-size: 15px; line-height: 1.9; color: var(--text-main); white-space: pre-wrap; }
+    .empty-tip { text-align: center; padding: 60px 20px; color: var(--text-desc); }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="top-bar">
-      <button class="back-btn" onclick="window.location.href='index.html'">← 返回</button>
+      <button class="back-btn" onclick="window.location.href='index.html'">← <span id="backText">返回</span></button>
       <div class="lang-switch">
         <button class="lang-btn" onclick="switchLang('zh')">中文</button>
         <button class="lang-btn" onclick="switchLang('en')">English</button>
       </div>
     </div>
-    <div class="page-content" id="content">内容正在路上</div>
+    <div class="page-header">
+      <div class="page-title" id="pageTitle">📚 学习AI</div>
+      <div class="page-subtitle" id="pageSubtitle">从入门到进阶，帮你真正用好AI</div>
+    </div>
+    <div class="article-list" id="articleList"></div>
   </div>
+
+  <!-- 文章详情弹层 -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeModal()">×</button>
+      <div class="modal-tag" id="modalTag"></div>
+      <div class="modal-title" id="modalTitle"></div>
+      <div class="modal-date" id="modalDate"></div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="data.js"></script>
   <script>
-    const langData={zh:{contentComing:"内容正在路上"},en:{contentComing:"Content is coming soon"}};
-    let currentLang=localStorage.getItem('currentLang')||'zh';
-    function switchLang(lang){currentLang=lang;localStorage.setItem('currentLang',lang);document.getElementById('content').textContent=langData[currentLang].contentComing;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');}
-    window.onload=()=>{switchLang(currentLang);document.getElementById('content').textContent=langData[currentLang].contentComing;};
+    const i18n = {
+      zh: { back: "返回", pageTitle: "📚 学习AI", pageSubtitle: "从入门到进阶，帮你真正用好AI", readMore: "阅读全文 →", empty: "文章即将更新，敬请期待" },
+      en: { back: "Back", pageTitle: "📚 Learn AI", pageSubtitle: "From beginner to advanced — learn to truly use AI", readMore: "Read more →", empty: "Articles coming soon" }
+    };
+    let lang = localStorage.getItem('currentLang') || 'zh';
+
+    function renderArticles() {
+      const list = document.getElementById('articleList');
+      const L = i18n[lang];
+      const articles = learnAiArticles;
+      if (!articles || articles.length === 0) { list.innerHTML = `<div class="empty-tip">${L.empty}</div>`; return; }
+      list.innerHTML = [...articles].reverse().map(a => `
+        <div class="article-card" onclick="openArticle(${a.id})">
+          <div class="article-meta">
+            <span class="article-tag">${a.tag}</span>
+            <span class="article-date">${a.date}</span>
+          </div>
+          <div class="article-title">${lang === 'zh' ? a.title : a.titleEn}</div>
+          <div class="article-desc">${lang === 'zh' ? a.desc : a.descEn}</div>
+          <div class="article-read-more">${L.readMore}</div>
+        </div>
+      `).join('');
+    }
+
+    function openArticle(id) {
+      const a = learnAiArticles.find(x => x.id === id);
+      if (!a) return;
+      document.getElementById('modalTag').textContent = a.tag;
+      document.getElementById('modalTitle').textContent = lang === 'zh' ? a.title : a.titleEn;
+      document.getElementById('modalDate').textContent = a.date;
+      document.getElementById('modalBody').textContent = lang === 'zh' ? a.content : a.contentEn;
+      document.getElementById('modalOverlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== document.getElementById('modalOverlay') && !e.target.classList.contains('modal-close')) return;
+      document.getElementById('modalOverlay').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    function updateStaticText() {
+      const L = i18n[lang];
+      document.getElementById('backText').textContent = L.back;
+      document.getElementById('pageTitle').textContent = L.pageTitle;
+      document.getElementById('pageSubtitle').textContent = L.pageSubtitle;
+      document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');
+    }
+
+    function switchLang(l) { lang = l; localStorage.setItem('currentLang', l); updateStaticText(); renderArticles(); }
+
+    window.onload = () => { updateStaticText(); renderArticles(); };
   </script>
 </body>
 </html>

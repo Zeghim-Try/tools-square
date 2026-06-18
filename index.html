@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>网速测试 - 免费在线测速工具</title>
+  <title>网速测试 - 工具广场</title>
+  <meta name="description" content="免费在线网速测试工具，精准测试上传、下载速度与延迟，支持中英文切换。">
+  <meta name="keywords" content="网速测试,测速,网络速度,宽带测速,在线测速,AI工具">
+  <meta property="og:title" content="网速测试 - 工具广场">
+  <meta property="og:description" content="免费在线网速测试，精准测试上传、下载速度与延迟">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tools-square-test.vercel.app/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="网速测试 - 工具广场">
+  <meta name="twitter:description" content="免费在线网速测试，精准测试上传、下载速度与延迟">
   <style>
     :root {
       --bg-main: #f5f7fa;
@@ -274,7 +283,7 @@
       </div>
     </div>
 
-    <!-- 测速主内容（不变） -->
+    <!-- 测速主内容 -->
     <div class="card">
       <div class="title" id="mainTitle">网速测试</div>
       <div class="desc" id="mainDesc">精准测试您的网络上传、下载速度与延迟</div>
@@ -306,7 +315,6 @@
   </div>
 
   <script>
-    // 多语言数据（已加入菜单、二级页面翻译）
     const langData = {
       zh: {
         mainTitle: "网速测试",
@@ -354,7 +362,6 @@
     let currentUnit = localStorage.getItem('currentUnit') || 'mbps';
     let isTesting = false;
 
-    // 侧边栏控制
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('show');
       document.getElementById('overlay').classList.toggle('show');
@@ -364,7 +371,6 @@
       document.getElementById('overlay').classList.remove('show');
     }
 
-    // 语言切换
     function switchLang(lang) {
       currentLang = lang;
       localStorage.setItem('currentLang', lang);
@@ -373,7 +379,6 @@
       document.querySelector(`.lang-btn[onclick="switchLang('${lang}')"]`).classList.add('active');
     }
 
-    // 单位切换
     function switchUnit(unit) {
       currentUnit = unit;
       localStorage.setItem('currentUnit', unit);
@@ -383,7 +388,6 @@
       loadHistory();
     }
 
-    // 更新界面语言
     function updateLang() {
       document.getElementById('mainTitle').textContent = langData[currentLang].mainTitle;
       document.getElementById('mainDesc').textContent = langData[currentLang].mainDesc;
@@ -400,7 +404,6 @@
       document.getElementById('menu4').textContent = langData[currentLang].menu4;
     }
 
-    // 加载历史记录
     function loadHistory() {
       const history = JSON.parse(localStorage.getItem('speedHistory')) || [];
       const list = document.getElementById('historyList');
@@ -417,7 +420,6 @@
       });
     }
 
-    // 测速核心逻辑（保留原功能不变）
     async function startTest() {
       if (isTesting) return;
       isTesting = true;
@@ -428,14 +430,14 @@
       try {
         const ping = await testPing();
         document.getElementById('pingValue').textContent = `${ping.toFixed(0)} ${langData[currentLang].unitMs}`;
-        
+
         const download = await testDownload();
         document.getElementById('downloadValue').textContent = `${download.toFixed(2)} ${langData[currentLang][currentUnit === 'mbps' ? 'unitMbps' : 'unitMBs']}`;
         document.getElementById('speedValue').textContent = download.toFixed(2);
-        
+
         const upload = await testUpload();
         document.getElementById('uploadValue').textContent = `${upload.toFixed(2)} ${langData[currentLang][currentUnit === 'mbps' ? 'unitMbps' : 'unitMBs']}`;
-        
+
         saveHistory(download, upload, ping);
         loadHistory();
       } catch (e) { console.error(e); }
@@ -476,7 +478,6 @@
       localStorage.setItem('speedHistory', JSON.stringify(history.slice(-20)));
     }
 
-    // 初始化
     window.onload = () => {
       updateLang();
       loadHistory();
